@@ -35,13 +35,18 @@ const UploadProductPage = () => {
     setContinent(event.currentTarget.value);
   };
 
+  const updateImages = (newImages) => {
+    setImgs(newImages);
+  };
+
   return (
     <div style={{ maxWidth: '700px', margin: '2rem auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <AntdTitle level={2}>여행 상품 업로드</AntdTitle>
       </div>
       <Form>
-        <FileUpload />
+        <FileUpload refreshFunction={updateImages} />
+
         <label>이름</label>
         <Input onChange={titleChangeHandler} value={title} />
         <label>설명</label>
