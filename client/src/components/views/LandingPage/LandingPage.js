@@ -6,16 +6,46 @@ import ImageSlider from '../../utils/ImageSlider';
 
 function LandingPage() {
   const [products, setProducts] = useState([]);
+  const [skip, setSkip] = useState(0);
+  const [limit, setLimit] = useState(4);
+  const [postSize, setPostSize] = useState(0);
 
   useEffect(() => {
-    axios.post('/api/product/products').then((response) => {
+    let body = {
+      skip: skip,
+      limit: limit,
+    };
+
+    getProducts(body);
+  }, []);
+
+  const getProducts = (body) => {
+    axios.post('/api/product/products', body).then((response) => {
       if (response.data.success) {
-        setProducts(response.data.productsInfo);
+        if (body.loadMore) {
+          setProducts([...products, ...response.data.productsInfo]);
+        } else {
+          setProducts(response.data.productsInfo);
+        }
+        setPostSize(response.data.postSize);
       } else {
         alert('상품 목록 로드 실패');
       }
     });
-  }, []);
+  };
+
+  const loadMoreHandler = () => {
+    let newSkip = skip + limit;
+
+    let body = {
+      skip: newSkip,
+      limit: limit,
+      loadMore: true,
+    };
+
+    getProducts(body);
+    setSkip(newSkip);
+  };
 
   const renderCards = products.map((product, idx) => {
     return (
@@ -35,11 +65,15 @@ function LandingPage() {
         </h2>
       </div>
 
-      <Row gutter={[16, 16]}> {renderCards}</Row>
+      <Row gutter={[16, 16]}>{renderCards}</Row>
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button>더보기</button>
-      </div>
+      {postSize >= limit && (
+        <div
+          style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+        >
+          <button onClick={loadMoreHandler}>더보기</button>
+        </div>
+      )}
     </div>
   );
 }
