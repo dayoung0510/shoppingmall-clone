@@ -3,12 +3,15 @@ import axios from 'axios';
 import { Icon, Col, Card, Row } from 'antd';
 import Meta from 'antd/lib/card/Meta';
 import ImageSlider from '../../utils/ImageSlider';
+import CheckBox from './Sections/CheckBox';
+import { continents } from './Sections/Datas';
 
 function LandingPage() {
   const [products, setProducts] = useState([]);
   const [skip, setSkip] = useState(0);
   const [limit, setLimit] = useState(4);
   const [postSize, setPostSize] = useState(0);
+  const [filters, setfilters] = useState({ continents: [], price: [] });
 
   useEffect(() => {
     let body = {
@@ -57,6 +60,24 @@ function LandingPage() {
     );
   });
 
+  const showFilteredResults = (f) => {
+    let body = {
+      skip: 0,
+      limit: limit,
+      filters: f,
+    };
+
+    getProducts(body);
+    setSkip(0);
+  };
+
+  const handleFilters = (f, category) => {
+    const newFilters = { ...filters };
+    newFilters[category] = f;
+
+    showFilteredResults(newFilters);
+  };
+
   return (
     <div style={{ width: '75%', margin: '3rem auto' }}>
       <div style={{ textAlign: 'center' }}>
@@ -64,6 +85,11 @@ function LandingPage() {
           Let's Travel Anywhere <Icon type='rocket' />
         </h2>
       </div>
+
+      <CheckBox
+        list={continents}
+        handleFilters={(filters) => handleFilters(filters, 'continents')}
+      />
 
       <Row gutter={[16, 16]}>{renderCards}</Row>
 
