@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Icon, Col, Card, Row } from 'antd';
-import Meta from 'antd/lib/card/Meta';
-import ImageSlider from '../../utils/ImageSlider';
-import CheckBox from './Sections/CheckBox';
-import RadioBox from './Sections/RadioBox';
-import { continents, price } from './Sections/Datas';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Icon, Col, Card, Row } from "antd";
+import Meta from "antd/lib/card/Meta";
+import ImageSlider from "../../utils/ImageSlider";
+import CheckBox from "./Sections/CheckBox";
+import RadioBox from "./Sections/RadioBox";
+import { continents, price } from "./Sections/Datas";
+import SearchFeature from "./Sections/SearchFeature";
 
 function LandingPage() {
   const [products, setProducts] = useState([]);
@@ -13,6 +14,7 @@ function LandingPage() {
   const [limit, setLimit] = useState(4);
   const [postSize, setPostSize] = useState(0);
   const [filters, setfilters] = useState({ continents: [], price: [] });
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     let body = {
@@ -24,7 +26,7 @@ function LandingPage() {
   }, []);
 
   const getProducts = (body) => {
-    axios.post('/api/product/products', body).then((response) => {
+    axios.post("/api/product/products", body).then((response) => {
       if (response.data.success) {
         if (body.loadMore) {
           setProducts([...products, ...response.data.productsInfo]);
@@ -33,7 +35,7 @@ function LandingPage() {
         }
         setPostSize(response.data.postSize);
       } else {
-        alert('상품 목록 로드 실패');
+        alert("상품 목록 로드 실패");
       }
     });
   };
@@ -54,7 +56,13 @@ function LandingPage() {
   const renderCards = products.map((product, idx) => {
     return (
       <Col lg={6} md={8} xs={24} key={idx}>
-        <Card cover={<ImageSlider images={product.images} />}>
+        <Card
+          cover={
+            <a href={`/product/${product._id}`}>
+              <ImageSlider images={product.images} />
+            </a>
+          }
+        >
           <Meta title={product.title} description={product.price} />
         </Card>
       </Col>
@@ -89,7 +97,7 @@ function LandingPage() {
     const newFilters = { ...filters };
     newFilters[category] = f;
 
-    if (category === 'price') {
+    if (category === "price") {
       let priceValues = handlePrice(f);
       newFilters[category] = priceValues;
     }
@@ -98,11 +106,24 @@ function LandingPage() {
     setfilters(newFilters);
   };
 
+  const updateSearchTerm = (newSearchTerm) => {
+    let body = {
+      skip: 0,
+      limit: limit,
+      filters: filters,
+      searchTerm: newSearchTerm,
+    };
+
+    setSkip(0);
+    setSearchTerm(newSearchTerm);
+    getProducts(body);
+  };
+
   return (
-    <div style={{ width: '75%', margin: '3rem auto' }}>
-      <div style={{ textAlign: 'center' }}>
+    <div style={{ width: "75%", margin: "3rem auto" }}>
+      <div style={{ textAlign: "center" }}>
         <h2>
-          Let's Travel Anywhere <Icon type='rocket' />
+          Let's Travel Anywhere <Icon type="rocket" />
         </h2>
       </div>
 
@@ -110,22 +131,32 @@ function LandingPage() {
         <Col lg={12} xs={24}>
           <CheckBox
             list={continents}
-            handleFilters={(f) => handleFilters(f, 'continents')}
+            handleFilters={(f) => handleFilters(f, "continents")}
           />
         </Col>
         <Col lg={12} xs={24}>
           <RadioBox
             list={price}
-            handleFilters={(f) => handleFilters(f, 'price')}
+            handleFilters={(f) => handleFilters(f, "price")}
           />
         </Col>
       </Row>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          margin: "1rem auto",
+        }}
+      >
+        <SearchFeature refreshFunction={updateSearchTerm} />
+      </div>
 
       <Row gutter={[16, 16]}>{renderCards}</Row>
 
       {postSize >= limit && (
         <div
-          style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+          style={{ width: "100%", display: "flex", justifyContent: "center" }}
         >
           <button onClick={loadMoreHandler}>더보기</button>
         </div>
