@@ -1,8 +1,13 @@
 import React from "react";
-import { Button, Badge, Descriptions } from "antd";
+import { Button, Descriptions } from "antd";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../../../_actions/user_actions";
 
 const ProductInfo = (props) => {
-  const clickHandler = () => {};
+  const dispatch = useDispatch();
+  const clickHandler = () => {
+    dispatch(addToCart(props.detail._id));
+  };
   return (
     <>
       <Descriptions title="PRODUCT INFO">
